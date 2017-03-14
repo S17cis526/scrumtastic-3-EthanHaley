@@ -1,6 +1,6 @@
 "use strict";
 
-var PORT = 3000;
+var PORT = 12037;
 
 var fs = require('fs');
 var http = require('http');
@@ -9,7 +9,7 @@ var db = new sqlite3.Database('scrumtastic.sqlite3', function(err) {
   if(err) console.error(err);
 });
 
-var router = new (require('./lib/route').Router);
+var router = new (require('./lib/route')).Router(db);
 
 router.get('/', function(req, res) {
   fs.readFile('public/index.html', function(err, body){
@@ -23,12 +23,17 @@ router.get('/app.js', function(req, res) {
   });
 });
 
-router.get('/projects', function(req, res) {
-  db.all('SELECT * FROM projects', [], function(err, projects){
-    res.setHeader('Content-Type', 'text/json');
-    res.end(JSON.stringify(projects));
-  });
-});
+var project = require('./src/resource/project');
+/*
+Old route way
+router.get('/projects', function(req, res) {project.list(req, res, db)});
+router.post('/projects', function(req, res) {project.create(req, res, db)});
+router.get('/projects/:id', function(req, res) {project.read(req, res, db)});
+router.post('/project/:id', function(req, res) {project.update(req, res, db)});
+router.get('/projects/:id/destroy', function(req, res) {project.destroy(req, res, db)});
+*/
+
+router.resource('/projects', project); //New routing
 
 var migrate = require('./lib/migrate');
 migrate(db, 'migrations', function(err){
