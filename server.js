@@ -10,6 +10,7 @@ var db = new sqlite3.Database('scrumtastic.sqlite3', function(err) {
 });
 
 var router = new (require('./lib/route')).Router(db);
+var auth = equire('./lib/auth-basic');
 
 router.get('/', function(req, res) {
   fs.readFile('public/index.html', function(err, body){
